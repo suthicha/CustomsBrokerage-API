@@ -7,6 +7,7 @@ var settings = require('./settings');
 var httpMsg = require('./core/httpMsg');
 var user = require('./controller/user');
 var product = require('./controller/product');
+var company = require('./controller/company');
 
 app.set('secert', settings.secert);
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -55,23 +56,23 @@ apiRoute.use(function(req, resp, next) {
 // ---------------------------------------------------------
 // route middleware to user api.
 // ---------------------------------------------------------
-apiRoute.get('/user', function(req, resp) {
+apiRoute.get('/users', function(req, resp) {
     user.getList(req, resp);
 })
 
-apiRoute.get('/user/:id', function(req, resp) {
+apiRoute.get('/users/:id', function(req, resp) {
     user.get(req, resp, req.params.id);
 })
 
-apiRoute.post('/user', function(req, resp) {
+apiRoute.post('/users', function(req, resp) {
     user.add(req, resp);
 });
 
-apiRoute.put('/user', function(req, resp) {
+apiRoute.put('/users', function(req, resp) {
     user.update(req, resp);
 })
 
-apiRoute.delete('/user', function(req, resp) {
+apiRoute.delete('/users', function(req, resp) {
     user.delete(req, resp);
 })
 
@@ -93,6 +94,39 @@ apiRoute.get('/products/:taxno/:id', function(req, resp) {
 apiRoute.post('/products', function(req, resp) {
     product.add(req, resp);
 })
+
+apiRoute.put('/products', function(req, resp) {
+    product.update(req, resp);
+})
+
+apiRoute.delete('/products', function(req, resp) {
+    product.delete(req, resp);
+})
+
+// ---------------------------------------------------------
+// route middleware to company api.
+// ---------------------------------------------------------
+apiRoute.get('/company', function(req, resp) {
+    company.getList(req, resp);
+})
+
+apiRoute.get('/company/:id', function(req, resp) {
+    company.get(req, resp, req.params.id);
+})
+
+apiRoute.post('/company', function(req, resp) {
+    company.add(req, resp);
+})
+
+apiRoute.put('/company', function(req, resp) {
+    company.update(req, resp);
+})
+
+apiRoute.delete('/company', function(req, resp) {
+    company.delete(req, resp);
+})
+
+
 
 
 apiRoute.get('/', function(req, resp) {

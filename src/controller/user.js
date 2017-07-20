@@ -1,4 +1,5 @@
 var jwt = require('jsonwebtoken');
+var squel = require('squel');
 var util = require('util');
 var db = require('../core/db');
 var httpMsg = require('../core/httpMsg');
@@ -8,14 +9,19 @@ var settings = require('../settings');
 exports.authenticate = function(req, resp) {
     try{
         if (!req.body) throw new Error("Input not valid");
-        var data = {
-            Username: req.body.Username,
-            UPassword: req.body.Password
-        }
-        
+        var data = req.body;
+
         if(data){
-            var sql = "SELECT Username, Fullname FROM DTM_Users ";
-            sql += util.format("WHERE Username='%s' AND UPassword='%s' AND UserStatus='A'", data.Username, data.UPassword);
+
+            var sql = squel.select()
+                    .from("DTM_Users")
+                    .field("Username")
+                    .field("Fullname")
+                    .where("Username = ?", data.Username)
+                    .where("UPassword = ?", data.Password)
+                    .where("UserStatus = ?", "A")
+                    .toString();
+            
             db.executeSql(sql, function(callback, err) { 
                 if (err){
                     httpMsg.show500(req, resp, err);
@@ -58,7 +64,13 @@ exports.authenticate = function(req, resp) {
 };
 
 exports.getList = function(req, resp){
-    db.executeSql(`SELECT * FROM DTM_Users WHERE UserStatus='A'`, function(data, err){
+    
+    var sql = squel.select()
+        .from("DTM_Users")
+        .where("UserStatus = ?", "A")
+        .toString();
+
+    db.executeSql(sql, function(data, err){
         if(err){
           httpMsg.show500(req, resp, err);
         }
@@ -72,7 +84,13 @@ exports.get = function(req, resp, id){
     try{
         if (!id) throw new Error("Input not valid");
         var userId = parseInt(id);
-        db.executeSql(`SELECT * FROM DTM_Users WHERE UserStatus='A' AND TrxId=` + userId, function(data, err){
+        var sql = squel.select()
+            .from("DTM_Users")
+            .where("UserStatus = ?", "A")
+            .where("TrxId = ?", userId)
+            .toString();
+
+        db.executeSql(sql, function(data, err){
             if(err){
             httpMsg.show500(req, resp, err);
             }
@@ -93,15 +111,20 @@ exports.add = function(req, resp){
       var data = req.body;
       
       if (data){
-          var sql = "INSERT INTO DTM_Users (Username, UPassword, Fullname, Email, Phone, Department, Location, RegisterDate, ExpiredDate, UserStatus) values ";
-          sql += util.format("('%s', '%s', '%s', '%s', '%s', '%s', '%s', GETDATE(), DATEADD(year,10,GETDATE()), 'A' )", 
-                helper.QuoteEncoding(data.Username), 
-                helper.QuoteEncoding(data.UPassword), 
-                helper.QuoteEncoding(data.FullName), 
-                helper.QuoteEncoding(data.Email), 
-                helper.QuoteEncoding(data.Phone), 
-                helper.QuoteEncoding(data.Department), 
-                helper.QuoteEncoding(data.Location));
+
+          var sql = squel.insert()
+                .into("DMT_Users")
+                .set("Username", helper.StringNull(data.Username))
+                .set("UPassword", helper.StringNull(data.UPassword))
+                .set("FullName", helper.StringNull(data.FullName))
+                .set("Email", helper.StringNull(data.Email))
+                .set("Phone", helper.StringNull(data.Phone))
+                .set("Department", helper.StringNull(data.Department))
+                .set("Location", helper.StringNull(data.Location))
+                .set("RegisterDate", "GETDATE()", { dontQuote: true })
+                .set("ExpiredDate", "DATEADD(year,10,GETDATE())", { dontQuote: true })
+                .set("UserStatus", "A")
+                .toString();
 
           db.executeSql(sql, function(data, err){
               if(err){
@@ -129,35 +152,16 @@ exports.update = function(req, resp){
       
       if (data){
         if(!data.TrxId) throw new Error("UserId not provide");
-        var sql = "UPDATE DTM_Users SET";
+        var sql = squel.update()
+            .table("DTM_Users")
+            .set("UPassword", helper.StringNull(data.UPassword))
+            .set("FullName", helper.StringNull(data.FullName))
+            .set("Email", helper.StringNull(data.Email))
+            .set("Phone", helper.StringNull(data.Phone))
+            .set("Department", helper.StringNull(data.Department))
+            .set("Location", helper.StringNull(data.Location))
+            .where("TrxId = ?", data.TrxId)
 
-        if (data.UPassword){
-            sql += " UPassword = '"+ helper.QuoteEncoding(data.UPassword) +"',";
-        }
-
-        if (data.FullName){
-            sql += " Fullname = '"+ helper.QuoteEncoding(data.FullName) +"',";
-        }
-
-        if (data.Email){
-            sql += " Email = '"+ helper.QuoteEncoding(data.Email) +"',";            
-        }
-
-        if (data.Phone){
-            sql += " Phone = '"+ helper.QuoteEncoding(data.Phone) +"',";            
-        }
-
-        if (data.Department){
-            sql += " Department = '"+ helper.QuoteEncoding(data.Department) +"',";            
-        }
-
-        if (data.Location){
-            sql += " Location = '"+ helper.QuoteEncoding(data.Location) +"',";            
-        }
-
-        sql = sql.slice(0,-1);
-        sql += " WHERE TrxId=" + data.TrxId;
-        
         db.executeSql(sql, function(data, err){
             if(err){
                 httpMsg.show500(req, resp, err);
@@ -184,8 +188,12 @@ exports.delete = function(req, resp){
       
       if (data){
         if(!data.TrxId) throw new Error("UserId not provide");
-        var sql = "UPDATE DTM_Users SET UserStatus='I', ExpiredDate=(SELECT GETDATE()) WHERE TrxId=" + data.TrxId;
-
+        var sql = squel.update()
+            .table("DTM_Users")
+            .set("UserStatus", "I")
+            .set("ExpiredDate", "GETDATE()", { dontQuote: true })
+            .where("TrxId = ?", data.TrxId)
+            
         db.executeSql(sql, function(data, err){
             if(err){
                 httpMsg.show500(req, resp, err);
