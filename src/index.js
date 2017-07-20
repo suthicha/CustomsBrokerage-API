@@ -86,6 +86,13 @@ apiRoute.get('/products/:taxno', function(req, resp) {
     product.getProduct(req, resp, req.params.taxno);
 })
 
+apiRoute.get('/products/:taxno/:id', function(req, resp) {
+    product.get(req, resp, req.params.taxno, req.params.id);
+})
+
+apiRoute.post('/products', function(req, resp) {
+    product.add(req, resp);
+})
 
 
 apiRoute.get('/', function(req, resp) {
