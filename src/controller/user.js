@@ -1,6 +1,5 @@
 var jwt = require('jsonwebtoken');
 var squel = require('squel');
-var util = require('util');
 var db = require('../core/db');
 var httpMsg = require('../core/httpMsg');
 var helper = require('../core/helper');
@@ -69,15 +68,7 @@ exports.getList = function(req, resp){
         .from("DTM_Users")
         .where("UserStatus = ?", "A")
         .toString();
-
-    db.executeSql(sql, function(data, err){
-        if(err){
-          httpMsg.show500(req, resp, err);
-        }
-        else {
-          httpMsg.sendJson(req, resp, data);
-        }
-    });
+    helper.execCommand(req, resp, sql);
 }
 
 exports.get = function(req, resp, id){
@@ -89,15 +80,7 @@ exports.get = function(req, resp, id){
             .where("UserStatus = ?", "A")
             .where("TrxId = ?", userId)
             .toString();
-
-        db.executeSql(sql, function(data, err){
-            if(err){
-            httpMsg.show500(req, resp, err);
-            }
-            else {
-            httpMsg.sendJson(req, resp, data);
-            }
-        });
+        helper.execCommand(req, resp, sql);
 
     }catch(ex){
         httpMsg.show500(req, resp, ex);
@@ -125,15 +108,8 @@ exports.add = function(req, resp){
                 .set("ExpiredDate", "DATEADD(year,10,GETDATE())", { dontQuote: true })
                 .set("UserStatus", "A")
                 .toString();
+          helper.execCommand(req, resp, sql);
 
-          db.executeSql(sql, function(data, err){
-              if(err){
-                httpMsg.show500(req, resp, err);
-              }
-              else {
-                httpMsg.show200(req, resp);
-              }
-          });
       }
       else {
         throw new Error("Input not valid");
@@ -161,15 +137,9 @@ exports.update = function(req, resp){
             .set("Department", helper.StringNull(data.Department))
             .set("Location", helper.StringNull(data.Location))
             .where("TrxId = ?", data.TrxId)
+            .toString();
 
-        db.executeSql(sql, function(data, err){
-            if(err){
-                httpMsg.show500(req, resp, err);
-            }
-            else {
-                httpMsg.show200(req, resp);
-            }
-        });
+         helper.execCommand(req, resp, sql);
       }
       else {
         throw new Error("Input not valid");
@@ -193,15 +163,9 @@ exports.delete = function(req, resp){
             .set("UserStatus", "I")
             .set("ExpiredDate", "GETDATE()", { dontQuote: true })
             .where("TrxId = ?", data.TrxId)
-            
-        db.executeSql(sql, function(data, err){
-            if(err){
-                httpMsg.show500(req, resp, err);
-            }
-            else {
-                httpMsg.show200(req, resp);
-            }
-        });
+            .toString();
+        helper.execCommand(req, resp, sql);
+        
       }
       else {
         throw new Error("Input not valid");

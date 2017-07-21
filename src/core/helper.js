@@ -1,3 +1,5 @@
+var db = require('./db');
+var httpMsg = require('./httpMsg');
 
 exports.QuoteEncoding = function(strvalue) {
     var strquotes = /(')/g;
@@ -10,6 +12,17 @@ exports.NumberNull = function(value){
 
 exports.StringNull = function(value){
    return value == null || value == undefined || value == ""? "": FixQuote(value);
+}
+
+exports.execCommand = function(req, resp, sql) {
+    db.executeSql(sql, function(data, err) {
+        if (err){
+            httpMsg.show500(req, resp, err);
+        }
+        else {
+            httpMsg.sendJson(req, resp, data);
+        }
+    })
 }
 
 function FixQuote(strvalue){

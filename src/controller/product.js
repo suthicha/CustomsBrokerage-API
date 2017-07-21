@@ -4,30 +4,18 @@ var httpMsg = require('../core/httpMsg');
 var helper = require('../core/helper');
 
 exports.getList = function(req, resp){
-
     try{
-        
         var sql = squel.select()
                 .from("DTM_Product")
                 .where("PdtStatus='A'")
                 .toString();
-        db.executeSql(sql, function(data, err){
-            if(err){
-                httpMsg.show500(req, resp, err);
-            }
-            else {
-                httpMsg.sendJson(req, resp, data);
-            }
-        });
-
+        helper.execCommand(req, resp, sql);
     }catch(ex){
         httpMsg.show500(req, resp, ex);
     }
-
 }
 
 exports.getProduct = function(req, resp, taxno){
-
     try{
         if (!taxno) throw new Error("Input not valid");
         var sql = squel.select()
@@ -35,15 +23,7 @@ exports.getProduct = function(req, resp, taxno){
                 .where("PdtStatus='A'")
                 .where("TaxNumber = ?", taxno)
                 .toString();
-        
-        db.executeSql(sql, function(data, err){
-            if(err){
-                httpMsg.show500(req, resp, err);
-            }
-            else {
-                httpMsg.sendJson(req, resp, data);
-            }
-        });
+        helper.execCommand(req, resp, sql);
 
     }catch(ex){
         httpMsg.show500(req, resp, ex);
@@ -60,15 +40,7 @@ exports.get = function(req, resp, taxno, id){
                 .where("PdtStatus='A'")
                 .where("TrxId = ?", id)
                 .toString();
-        
-        db.executeSql(sql, function(data, err){
-            if(err){
-                httpMsg.show500(req, resp, err);
-            }
-            else {
-                httpMsg.sendJson(req, resp, data);
-            }
-        });
+        helper.execCommand(req, resp, sql);
 
     }catch(ex){
         httpMsg.show500(req, resp, ex);
@@ -149,16 +121,7 @@ exports.add = function(req, resp){
             .set("UpdateDate", "19000101")
             .set("PdtStatus", "A")
             .toString();
-
-            db.executeSql(sql, function(data, err){
-              if(err){
-                httpMsg.show500(req, resp, err);
-              }
-              else {
-                httpMsg.show200(req, resp);
-              }
-            });
-
+        helper.execCommand(req, resp, sql);
 
     }catch(ex){
         httpMsg.show500(req, resp, ex);
@@ -241,15 +204,7 @@ exports.update = function(req, resp){
             .set("UpdateDate", "GETDATE()", { dontQuote: true })
             .where("TrxId = ?", id)
             .toString();
-
-            db.executeSql(sql, function(data, err){
-              if(err){
-                httpMsg.show500(req, resp, err);
-              }
-              else {
-                httpMsg.show200(req, resp);
-              }
-            });
+        helper.execCommand(req, resp, sql);
 
     }catch (ex) {
         httpMsg.show500(req, resp, ex);
@@ -265,17 +220,7 @@ exports.delete = function(req, resp){
             .from("DTM_Product")
             .where("TrxId = ?", data.TrxId)
             .toString();
-
-        db.executeSql(sql, function(data, err){
-            if(err){
-            httpMsg.show500(req, resp, err);
-            }
-            else {
-            httpMsg.show200(req, resp);
-            }
-        });  
-
-
+        helper.execCommand(req, resp, sql);
     }catch(ex){
         httpMsg.show500(req, resp, ex);
     }
