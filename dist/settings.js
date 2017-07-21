@@ -1,3 +1,5 @@
+"use strict";
+
 exports.dbConfig = {
     user: "sa",
     password: "cti2016",
@@ -9,3 +11,4 @@ exports.dbConfig = {
 exports.webPort = 5000;
 exports.secert = "m88tTfYxzC";
 exports.jobprefix = "DEP";
+//# sourceMappingURL=settings.js.map
